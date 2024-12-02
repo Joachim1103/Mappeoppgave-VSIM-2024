@@ -1,3 +1,25 @@
 ﻿  Source.cpp
-LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
+C:\Unreal Engine 5\Github\Mappeoppgave-VSIM_2024\Mappeoppgave-VSIM-2024\Mappeoppgave-VSIM-VS\Source.cpp(213,28): warning C4267: 'argument': conversion from 'size_t' to '_Ty', possible loss of data
+          with
+          [
+              _Ty=unsigned int
+          ]
+C:\Unreal Engine 5\Github\Mappeoppgave-VSIM_2024\Mappeoppgave-VSIM-2024\Mappeoppgave-VSIM-VS\Source.cpp(214,32): warning C4267: 'argument': conversion from 'size_t' to '_Ty', possible loss of data
+          with
+          [
+              _Ty=unsigned int
+          ]
+C:\Unreal Engine 5\Github\Mappeoppgave-VSIM_2024\Mappeoppgave-VSIM-2024\Mappeoppgave-VSIM-VS\Source.cpp(215,32): warning C4267: 'argument': conversion from 'size_t' to '_Ty', possible loss of data
+          with
+          [
+              _Ty=unsigned int
+          ]
+C:\Unreal Engine 5\Github\Mappeoppgave-VSIM_2024\Mappeoppgave-VSIM-2024\Mappeoppgave-VSIM-VS\Source.cpp(283,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Unreal Engine 5\Github\Mappeoppgave-VSIM_2024\Mappeoppgave-VSIM-2024\Mappeoppgave-VSIM-VS\Source.cpp(284,17): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Unreal Engine 5\Github\Mappeoppgave-VSIM_2024\Mappeoppgave-VSIM-2024\Mappeoppgave-VSIM-VS\Source.cpp(288,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Unreal Engine 5\Github\Mappeoppgave-VSIM_2024\Mappeoppgave-VSIM-2024\Mappeoppgave-VSIM-VS\Source.cpp(289,19): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Unreal Engine 5\Github\Mappeoppgave-VSIM_2024\Mappeoppgave-VSIM-2024\Mappeoppgave-VSIM-VS\Source.cpp(290,13): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Unreal Engine 5\Github\Mappeoppgave-VSIM_2024\Mappeoppgave-VSIM-2024\Mappeoppgave-VSIM-VS\Source.cpp(291,13): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+C:\Unreal Engine 5\Github\Mappeoppgave-VSIM_2024\Mappeoppgave-VSIM-2024\Mappeoppgave-VSIM-VS\Source.cpp(360,28): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+C:\Unreal Engine 5\Github\Mappeoppgave-VSIM_2024\Mappeoppgave-VSIM-2024\Mappeoppgave-VSIM-VS\Source.cpp(379,72): warning C4267: 'argument': conversion from 'size_t' to 'GLsizei', possible loss of data
   Mappeoppgave-VSIM-VS.vcxproj -> C:\Unreal Engine 5\Github\Mappeoppgave-VSIM_2024\Mappeoppgave-VSIM-2024\x64\Debug\Mappeoppgave-VSIM-VS.exe
