@@ -1,3 +1,7 @@
+//sources
+// Matematikk3_V24_VSIM101_H24 Document
+// Assistance from ChatGPT
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm.hpp>
@@ -10,61 +14,90 @@
 #include <algorithm>
 #include <chrono>
 
-// Vertex Shader Source
 const char* vertexShaderSource = R"(
     #version 330 core
     layout(location = 0) in vec3 aPos;
     layout(location = 1) in vec3 aNormal;
+
+    uniform mat4 model;
     uniform mat4 view;
     uniform mat4 projection;
-    out vec3 FragNormal;
+
+    out vec3 FragPos;
+    out vec3 Normal;
+
     void main()
     {
-        FragNormal = aNormal;
-        gl_Position = projection * view * vec4(aPos, 1.0);
+        FragPos = vec3(model * vec4(aPos, 1.0)); // Calculate world-space position
+        Normal = mat3(transpose(inverse(model))) * aNormal; // Transform normal
+        gl_Position = projection * view * vec4(FragPos, 1.0);
     }
 )";
 
-// Fragment Shader Source
 const char* fragmentShaderSource = R"(
     #version 330 core
+
+    in vec3 FragPos;
+    in vec3 Normal;
+
+    uniform vec3 lightPos;
+    uniform vec3 viewPos; // Camera position
+    uniform vec3 lightColor;
+    uniform vec3 objectColor;
+
     out vec4 FragColor;
-    in vec3 FragNormal;
+
     void main()
     {
-        vec3 color = normalize(FragNormal) * 0.5 + 0.5; // Map normals to RGB
-        FragColor = vec4(color, 1.0);
+        // Ambient
+        float ambientStrength = 0.3;
+        vec3 ambient = ambientStrength * lightColor;
+
+        // Diffuse
+        vec3 norm = normalize(Normal);
+        vec3 lightDir = normalize(lightPos - FragPos);
+        float diff = max(dot(norm, lightDir), 0.0);
+        vec3 diffuse = diff * lightColor;
+
+        // Specular
+        float specularStrength = 1.0;
+        vec3 viewDir = normalize(viewPos - FragPos);
+        vec3 reflectDir = reflect(-lightDir, norm);
+        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+        vec3 specular = specularStrength * spec * lightColor;
+
+        vec3 result = (ambient + diffuse + specular) * objectColor;
+        FragColor = vec4(result, 1.0);
     }
 )";
 
-// Store 3D Points
 struct Point
 {
     float x, y, z;
 };
 
-// Store Vertices for Rendering
 struct Vertex
 {
     glm::vec3 position;
     glm::vec3 normal;
 };
 
-// Camera variables
-glm::vec3 cameraPos(0.0f, 1.0f, 5.0f); // Start above the center of the terrain
+glm::vec3 cameraPos(0.0f, 1.0f, 5.0f); 
 glm::vec3 cameraFront(0.0f, 0.0f, -1.0f);
 glm::vec3 cameraUp(0.0f, 1.0f, 0.0f);
 
-float deltaTime = 0.0f; // Time between current frame and last frame
-float lastFrame = 0.0f; // Time of last frame
-float yaw = -90.0f;     // Yaw starts facing -Z
+float deltaTime = 0.0f; 
+float lastFrame = 0.0f; 
+float yaw = -90.0f;     
 float pitch = 0.0f;
-float lastX = 960.0f, lastY = 540.0f; // Center of the screen
+float lastX = 960.0f, lastY = 540.0f;
 bool firstMouse = true;
 
-bool keys[1024] = { false }; // Track key presses
+bool keys[1024] = { false };
 
-// Helper: Compile Shader
+float roll = 0.0f;
+bool isRMBPressed = false;
+
 GLuint compileShader(GLenum type, const char* source)
 {
     GLuint shader = glCreateShader(type);
@@ -82,7 +115,6 @@ GLuint compileShader(GLenum type, const char* source)
     return shader;
 }
 
-// Create Shader Program
 GLuint createShaderProgram()
 {
     GLuint vertexShader = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
@@ -108,7 +140,6 @@ GLuint createShaderProgram()
     return program;
 }
 
-// Load Terrain Data
 std::vector<Point> loadTerrainData(const std::string& filename)
 {
     std::vector<Point> points;
@@ -133,7 +164,6 @@ std::vector<Point> loadTerrainData(const std::string& filename)
     return points;
 }
 
-// Helper: Check if a Point is Inside a Circumcircle
 bool isPointInCircumcircle(const glm::vec3& p, const glm::vec3& a, const glm::vec3& b, const glm::vec3& c)
 {
     glm::mat4 mat(1.0f);
@@ -180,7 +210,6 @@ void normalizePoints(std::vector<Point>& points)
     std::cout << "Points normalized to range [-1, 1]." << std::endl;
 }
 
-// Generate a Simplified Delaunay Triangulation
 void triangulateSimplified(const std::vector<Point>& points, std::vector<Vertex>& vertices, std::vector<unsigned int>& indices)
 {
     if (points.size() < 3)
@@ -189,7 +218,6 @@ void triangulateSimplified(const std::vector<Point>& points, std::vector<Vertex>
         return;
     }
 
-    // Convert points to vertices
     vertices.resize(points.size());
     for (size_t i = 0; i < points.size(); ++i)
     {
@@ -197,13 +225,11 @@ void triangulateSimplified(const std::vector<Point>& points, std::vector<Vertex>
         vertices[i].normal = glm::vec3(0.0f);
     }
 
-    // Sort points by spatial proximity in 2D (x, z)
     std::vector<Point> sortedPoints = points;
     std::sort(sortedPoints.begin(), sortedPoints.end(), [](const Point& a, const Point& b) {
         return (a.x < b.x) || (a.x == b.x && a.z < b.z);
         });
 
-    // Create triangles sequentially
     for (size_t i = 0; i < sortedPoints.size() - 2; ++i)
     {
         glm::vec3 p0(sortedPoints[i].x, sortedPoints[i].y, sortedPoints[i].z);
@@ -215,8 +241,7 @@ void triangulateSimplified(const std::vector<Point>& points, std::vector<Vertex>
         indices.push_back(i + 2);
     }
 
-    // Post-processing: Filter triangles with long edges
-    float maxEdgeLength = 0.15f; // Adjust as needed
+    float maxEdgeLength = 0.15f;
     std::vector<unsigned int> filteredIndices;
 
     for (size_t i = 0; i < indices.size(); i += 3)
@@ -229,7 +254,6 @@ void triangulateSimplified(const std::vector<Point>& points, std::vector<Vertex>
         float d12 = glm::distance(v1, v2);
         float d20 = glm::distance(v2, v0);
 
-        // Only keep triangles with acceptable edge lengths
         if (d01 < maxEdgeLength && d12 < maxEdgeLength && d20 < maxEdgeLength)
         {
             filteredIndices.push_back(indices[i]);
@@ -238,7 +262,6 @@ void triangulateSimplified(const std::vector<Point>& points, std::vector<Vertex>
         }
         else
         {
-            // Debug log for problematic triangles
             std::cout << "Removed triangle: " << indices[i] << ", " << indices[i + 1] << ", " << indices[i + 2]
                 << " | Edges: " << d01 << ", " << d12 << ", " << d20 << std::endl;
         }
@@ -248,7 +271,6 @@ void triangulateSimplified(const std::vector<Point>& points, std::vector<Vertex>
     std::cout << "Filtered triangulation completed. Remaining triangles: " << indices.size() / 3 << std::endl;
 }
 
-// Calculate Normals for Each Vertex
 void calculateNormals(std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
 {
     for (auto& vertex : vertices)
@@ -275,9 +297,10 @@ void calculateNormals(std::vector<Vertex>& vertices, const std::vector<unsigned 
     }
 }
 
-// Mouse Callback
 void mouseCallback(GLFWwindow* window, double xpos, double ypos)
 {
+    static float lastX = 960.0f, lastY = 540.0f;
+
     if (firstMouse)
     {
         lastX = xpos;
@@ -294,11 +317,18 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos)
     xOffset *= sensitivity;
     yOffset *= sensitivity;
 
-    yaw += xOffset;
-    pitch += yOffset;
+    if (isRMBPressed)
+    {
+        roll += xOffset;
+    }
+    else
+    {
+        yaw += xOffset;
+        pitch += yOffset;
 
-    if (pitch > 89.0f) pitch = 89.0f;
-    if (pitch < -89.0f) pitch = -89.0f;
+        if (pitch > 89.0f) pitch = 89.0f;
+        if (pitch < -89.0f) pitch = -89.0f;
+    }
 
     glm::vec3 front;
     front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
@@ -307,7 +337,6 @@ void mouseCallback(GLFWwindow* window, double xpos, double ypos)
     cameraFront = glm::normalize(front);
 }
 
-// Key Callback
 void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods)
 {
     if (key >= 0 && key < 1024)
@@ -319,7 +348,17 @@ void keyCallback(GLFWwindow* window, int key, int scancode, int action, int mods
     }
 }
 
-// Process Input
+void mouseButtonCallback(GLFWwindow* window, int button, int action, int mods)
+{
+    if (button == GLFW_MOUSE_BUTTON_RIGHT)
+    {
+        if (action == GLFW_PRESS)
+            isRMBPressed = true;
+        else if (action == GLFW_RELEASE)
+            isRMBPressed = false;
+    }
+}
+
 void processInput()
 {
     float cameraSpeed = 2.5f * deltaTime;
@@ -333,7 +372,6 @@ void processInput()
         cameraPos += glm::normalize(glm::cross(cameraFront, cameraUp)) * cameraSpeed;
 }
 
-// Render Loop
 void renderLoop(GLFWwindow* window, GLuint shaderProgram, const std::vector<Vertex>& vertices, const std::vector<unsigned int>& indices)
 {
     GLuint VBO, VAO, EBO;
@@ -363,17 +401,29 @@ void renderLoop(GLFWwindow* window, GLuint shaderProgram, const std::vector<Vert
 
         processInput();
 
+        glm::mat4 model = glm::mat4(1.0f);
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
         glm::mat4 projection = glm::perspective(glm::radians(45.0f), 1920.0f / 1080.0f, 0.1f, 100.0f);
+
+        glm::mat4 rollRotation = glm::rotate(glm::mat4(1.0f), glm::radians(roll), cameraFront);
+        view = rollRotation * view;
 
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glUseProgram(shaderProgram);
-        GLuint viewLoc = glGetUniformLocation(shaderProgram, "view");
-        GLuint projLoc = glGetUniformLocation(shaderProgram, "projection");
 
-        glUniformMatrix4fv(viewLoc, 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(projLoc, 1, GL_FALSE, glm::value_ptr(projection));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(glGetUniformLocation(shaderProgram, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+        glm::vec3 lightPos(3.0f, 5.0f, 3.0f);
+        glm::vec3 lightColor(1.0f, 0.95f, 0.9f);
+        glm::vec3 objectColor(0.2f, 0.6f, 0.3f);
+
+        glUniform3fv(glGetUniformLocation(shaderProgram, "lightPos"), 1, glm::value_ptr(lightPos));
+        glUniform3fv(glGetUniformLocation(shaderProgram, "viewPos"), 1, glm::value_ptr(cameraPos));
+        glUniform3fv(glGetUniformLocation(shaderProgram, "lightColor"), 1, glm::value_ptr(lightColor));
+        glUniform3fv(glGetUniformLocation(shaderProgram, "objectColor"), 1, glm::value_ptr(objectColor));
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
@@ -416,8 +466,6 @@ int main()
 
     glEnable(GL_DEPTH_TEST);
 
-    //glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-
     std::vector<Point> points = loadTerrainData("Elevation Data.txt");
     if (points.empty())
     {
@@ -430,16 +478,12 @@ int main()
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
 
-    // Start triangulation timer
     auto start = std::chrono::high_resolution_clock::now();
 
     triangulateSimplified(points, vertices, indices);
 
-    std::cout << "Vertices count: " << vertices.size() << std::endl;
-    std::cout << "Indices count: " << indices.size() << std::endl;
     std::cout << "Vertices: " << vertices.size() << ", Indices: " << indices.size() << std::endl;
 
-    // End triangulation timer
     auto end = std::chrono::high_resolution_clock::now();
     std::chrono::duration<double> elapsed = end - start;
     std::cout << "Triangulation time: " << elapsed.count() << " seconds" << std::endl;
