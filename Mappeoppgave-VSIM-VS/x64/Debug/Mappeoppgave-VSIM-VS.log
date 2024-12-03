@@ -1,3 +1,9 @@
 ﻿  Source.cpp
+C:\Unreal Engine 5\Github\Mappeoppgave-VSIM_2024\Mappeoppgave-VSIM-2024\Mappeoppgave-VSIM-VS\Source.cpp(131,32): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Unreal Engine 5\Github\Mappeoppgave-VSIM_2024\Mappeoppgave-VSIM-2024\Mappeoppgave-VSIM-VS\Source.cpp(132,32): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+C:\Unreal Engine 5\Github\Mappeoppgave-VSIM_2024\Mappeoppgave-VSIM-2024\Mappeoppgave-VSIM-VS\Source.cpp(138,33): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+C:\Unreal Engine 5\Github\Mappeoppgave-VSIM_2024\Mappeoppgave-VSIM-2024\Mappeoppgave-VSIM-VS\Source.cpp(139,33): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+C:\Unreal Engine 5\Github\Mappeoppgave-VSIM_2024\Mappeoppgave-VSIM-2024\Mappeoppgave-VSIM-VS\Source.cpp(149,31): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+  LINK : C:\Unreal Engine 5\Github\Mappeoppgave-VSIM_2024\Mappeoppgave-VSIM-2024\x64\Debug\Mappeoppgave-VSIM-VS.exe not found or not built by the last incremental link; performing full link
 LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
   Mappeoppgave-VSIM-VS.vcxproj -> C:\Unreal Engine 5\Github\Mappeoppgave-VSIM_2024\Mappeoppgave-VSIM-2024\x64\Debug\Mappeoppgave-VSIM-VS.exe

@@ -1,4 +1,5 @@
 //sources
+// Matematikk3_V24_VSIM101_H24 Document
 // Assistance from ChatGPT
 
 #include <GLFW/glfw3.h>
