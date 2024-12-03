@@ -1,3 +1,7 @@
+//sources
+// Matematikk3_V24_VSIM101_H24 Document
+// Assistance from ChatGPT
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <glm.hpp>
